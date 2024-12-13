@@ -26,10 +26,10 @@
             font-size: 0.9em;
             color: #888;
         }
-        .weather {
-            margin-top: 20px;
-            font-size: 1.5em;
-            color: #333;
+        iframe {
+            width: 100%;
+            height: 600px;
+            border: none;
         }
     </style>
 </head>
@@ -45,8 +45,9 @@
     <p id="time"></p>
 </div>
 
-<div class="weather" id="weather">
-    <p>正在获取天气信息...</p>
+<div class="weather">
+    <h2>当地天气</h2>
+    <iframe src="https://weather.cma.cn/" title="中国气象局天气查询"></iframe>
 </div>
 
 <div class="footer">
@@ -54,7 +55,6 @@
 </div>
 
 <script>
-  // 获取当前日期、时间、星期
   function updateDateTime() {
     const now = new Date();
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
@@ -62,49 +62,13 @@
     const formattedTime = now.toLocaleTimeString('zh-CN');
     const weekday = now.toLocaleString('zh-CN', { weekday: 'long' });
 
-    // 更新页面显示内容
     document.getElementById('date').textContent = `今天是：${formattedDate}`;
     document.getElementById('time').textContent = `当前时间：${formattedTime}`;
   }
 
-  // 每秒更新时间
   setInterval(updateDateTime, 1000);
 
-  // 初始化页面显示
   updateDateTime();
-
-  // 获取用户IP并查询天气信息
-  function getWeather() {
-    // 获取用户IP地址（这里使用ip-api免费接口，若需要高频次请求可以选择付费服务）
-    fetch('http://ip-api.com/json/')
-    .then(response => response.json())
-    .then(data => {
-      const city = data.city;
-      const country = data.country;
-      // 使用和风天气API获取天气信息
-      const apiKey = 'YOUR_API_KEY'; // 在和风天气官网注册并获取API Key
-      const url = `https://api.heweather.com/v7/weather/now?location=${city}&key=${apiKey}`;
-
-      fetch(url)
-      .then(response => response.json())
-      .then(weatherData => {
-        const temperature = weatherData.now.temp;
-        const weather = weatherData.now.text;
-        document.getElementById('weather').textContent = `${city}, ${country} 当前天气：${weather}，温度：${temperature}°C`;
-      })
-      .catch(err => {
-        document.getElementById('weather').textContent = '无法获取天气信息';
-        console.error('天气API请求失败:', err);
-      });
-    })
-    .catch(err => {
-      document.getElementById('weather').textContent = '无法获取位置信息';
-      console.error('IP获取失败:', err);
-    });
-  }
-
-  // 页面加载时调用获取天气函数
-  getWeather();
 </script>
 </body>
 </html>
