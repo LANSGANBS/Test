@@ -55,7 +55,6 @@
 
 <div class="weather-container">
     <h2>当地天气</h2>
-    <div id="location">正在获取位置信息...</div>
     <div id="weather">正在获取天气信息...</div>
 </div>
 
@@ -77,60 +76,6 @@
   setInterval(updateDateTime, 1000);
   updateDateTime();
 
-  function getWeatherDescription(code) {
-    const weatherCodes = {
-      0: '晴朗',
-      1: '主要是晴朗',
-      2: '部分多云',
-      3: '多云',
-      45: '有雾',
-      48: '沉积物雾',
-      51: '细毛毛雨',
-      53: '中度毛毛雨',
-      55: '密集毛毛雨',
-      56: '轻度冻毛毛雨',
-      57: '浓密冻毛毛雨',
-      61: '小雨',
-      63: '中雨',
-      65: '大雨',
-      66: '轻度冻雨',
-      67: '大冻雨',
-      71: '小雪',
-      73: '中雪',
-      75: '大雪',
-      77: '雪粒',
-      80: '小阵雨',
-      81: '中阵雨',
-      82: '大阵雨',
-      85: '小阵雪',
-      86: '大阵雪',
-      95: '雷暴',
-      96: '轻度冰雹雷暴',
-      99: '大冰雹雷暴',
-    };
-    return weatherCodes[code] || '未知天气';
-  }
-
-  function getLocationName(lat, lon) {
-    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10&addressdetails=1&accept-language=zh-CN`;
-
-    fetch(url)
-    .then(response => response.json())
-    .then(data => {
-      console.log('位置信息：', data);
-      const address = data.address;
-      const country = address.country || '';
-      const state = address.state || '';
-      const city = address.city || address.town || address.village || '';
-      const locationDiv = document.getElementById('location');
-      locationDiv.textContent = `当前位置：${country}，${state}，${city}`;
-    })
-    .catch(error => {
-      console.error('获取位置信息失败', error);
-      document.getElementById('location').textContent = '获取位置信息失败';
-    });
-  }
-
   function getWeather(lat, lon) {
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m&current_weather=true&timezone=Asia%2FShanghai`;
 
@@ -142,10 +87,43 @@
       console.log('天气数据：', data);
       if (data.current_weather) {
         const weatherDiv = document.getElementById('weather');
+        const weatherDescriptions = {
+          0: '晴',
+          1: '主要晴朗',
+          2: '部分多云',
+          3: '多云',
+          45: '有雾',
+          48: '霜雾',
+          51: '小毛毛雨',
+          53: '中毛毛雨',
+          55: '大毛毛雨',
+          56: '小冻毛毛雨',
+          57: '大冻毛毛雨',
+          61: '小雨',
+          63: '中雨',
+          65: '大雨',
+          66: '小冻雨',
+          67: '大冻雨',
+          71: '小雪',
+          73: '中雪',
+          75: '大雪',
+          77: '雪粒',
+          80: '小阵雨',
+          81: '中阵雨',
+          82: '大阵雨',
+          85: '小阵雪',
+          86: '大阵雪',
+          95: '雷暴',
+          96: '雷暴伴有小冰雹',
+          99: '雷暴伴有大冰雹'
+        };
+        const weatherDescription = weatherDescriptions[data.current_weather.weathercode] || '未知天气';
         weatherDiv.innerHTML = `
+            <p>经度：${data.longitude}</p>
+            <p>纬度：${data.latitude}</p>
             <p>温度：${data.current_weather.temperature}°C</p>
             <p>风速：${data.current_weather.windspeed} km/h</p>
-            <p>天气：${getWeatherDescription(data.current_weather.weathercode)}</p>
+            <p>天气：${weatherDescription}</p>
           `;
       } else {
         document.getElementById('weather').textContent = '获取天气信息失败';
@@ -162,17 +140,14 @@
       navigator.geolocation.getCurrentPosition(position => {
         const lat = position.coords.latitude;
         const lon = position.coords.longitude;
-        getLocationName(lat, lon);
         getWeather(lat, lon);
       }, error => {
         console.error('无法获取地理位置信息', error);
-        document.getElementById('location').textContent = '无法获取地理位置信息：' + error.message;
-        document.getElementById('weather').textContent = '无法获取天气信息';
+        document.getElementById('weather').textContent = '无法获取地理位置信息：' + error.message;
       });
     } else {
       console.error('浏览器不支持地理定位');
-      document.getElementById('location').textContent = '浏览器不支持地理定位';
-      document.getElementById('weather').textContent = '无法获取天气信息';
+      document.getElementById('weather').textContent = '浏览器不支持地理定位';
     }
   }
 
